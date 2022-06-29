@@ -137,7 +137,11 @@ def handle_html_references(html_content, page_duplicate_file_names, page_file_ma
             try:
                 page_title = link_element.attrib['href'].split('/')[4]
             except:
+                pass
+            try:
                 page_title = link_element.attrib['href'].split('/')[3]
+            except:
+                page_title = link_element.attrib['href'].split('/')[2]
 
             page_title = page_title.replace('+', ' ')
             decoded_page_title = utils.decode_url(page_title)
@@ -336,10 +340,10 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
                 page_url = '%s%s' % (settings.CONFLUENCE_BASE_URL, page_url)
             else:
                 page_url = None
-
+        
         # Export HTML file
-        page_content = handle_html_references(page_content, page_duplicate_file_names, page_file_matching,
-                                              depth=depth+1)
+        page_content = str(handle_html_references(page_content, page_duplicate_file_names, page_file_matching,
+                                              depth=depth+1))
         file_path = '%s/%s' % (folder_path, file_name)
         page_content += create_html_attachment_index(path_collection['child_attachments'])
         utils.write_html_2_file(file_path, page_title, page_content, html_template)

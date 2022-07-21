@@ -56,7 +56,7 @@ def derive_downloaded_file_name(download_url):
         download_page_id = download_url_parts[3]
         download_file_type = download_url_parts[2]
 
-        if download_file_type == 'temp':
+        if len(download_url_parts) < 5:
             return '%s_%s' % (download_file_type, download_page_id)
 
         # Remove GET parameters

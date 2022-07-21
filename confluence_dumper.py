@@ -56,6 +56,9 @@ def derive_downloaded_file_name(download_url):
         download_page_id = download_url_parts[3]
         download_file_type = download_url_parts[2]
 
+        if download_file_type == 'temp':
+            return '%s_%s' % (download_file_type, download_page_id)
+
         # Remove GET parameters
         last_question_mark_index = download_url_parts[4].rfind('?')
         download_original_file_name = download_url_parts[4][:last_question_mark_index]
@@ -307,6 +310,8 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
                                   verify_peer_certificate=settings.VERIFY_PEER_CERTIFICATE,
                                   proxies=settings.HTTP_PROXIES)
         page_content = response['body']['view']['value']
+        page_url = response['_links']['webui']
+        url_comment = "\n\n<!-- URL: {} -->\n".format(page_url)
 
         page_title = response['title']
         print('%sPAGE: %s (%s)' % ('\t'*(depth+1), page_title, page_id))
@@ -320,42 +325,42 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
 
         # Download attachments of this page
         # TODO: Outsource/Abstract the following two while loops because of much duplicate code.
-        page_url = '%s/rest/api/content/%s/child/attachment?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
-        counter = 0
-        while page_url:
-            response = utils.http_get(page_url, auth=settings.HTTP_AUTHENTICATION, headers=settings.HTTP_CUSTOM_HEADERS,
-                                      verify_peer_certificate=settings.VERIFY_PEER_CERTIFICATE,
-                                      proxies=settings.HTTP_PROXIES)
-            counter += len(response['results'])
-            for attachment in response['results']:
-                download_url = attachment['_links']['download']
-                attachment_id = attachment['id'][3:]
-                attachment_info = download_attachment(download_url, download_folder, attachment_id,
-                                                      attachment_duplicate_file_names, attachment_file_matching,
-                                                      depth=depth+1)
-                path_collection['child_attachments'].append(attachment_info)
+        #page_url = '%s/rest/api/content/%s/child/attachment?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
+        #counter = 0
+        #while page_url:
+        #    response = utils.http_get(page_url, auth=settings.HTTP_AUTHENTICATION, headers=settings.HTTP_CUSTOM_HEADERS,
+        #                              verify_peer_certificate=settings.VERIFY_PEER_CERTIFICATE,
+        #                              proxies=settings.HTTP_PROXIES)
+        #    counter += len(response['results'])
+        #    for attachment in response['results']:
+        #        download_url = attachment['_links']['download']
+        #        attachment_id = attachment['id'][3:]
+        #        attachment_info = download_attachment(download_url, download_folder, attachment_id,
+        #                                              attachment_duplicate_file_names, attachment_file_matching,
+        #                                              depth=depth+1)
+        #        path_collection['child_attachments'].append(attachment_info)
 
-            if 'next' in response['_links'].keys():
-                page_url = response['_links']['next']
-                page_url = '%s%s' % (settings.CONFLUENCE_BASE_URL, page_url)
-            else:
-                page_url = None
-        
+        #    if 'next' in response['_links'].keys():
+        #        page_url = response['_links']['next']
+        #        page_url = '%s%s' % (settings.CONFLUENCE_BASE_URL, page_url)
+        #    else:
+        #        page_url = None
+
         # Export HTML file
         page_content = str(handle_html_references(page_content, page_duplicate_file_names, page_file_matching,
                                               depth=depth+1))
         file_path = '%s/%s' % (folder_path, file_name)
-        page_content += create_html_attachment_index(path_collection['child_attachments'])
-        utils.write_html_2_file(file_path, page_title, page_content, html_template)
+        #page_content += create_html_attachment_index(path_collection['child_attachments'])
+        utils.write_html_2_file(file_path, page_title, page_content + url_comment, html_template)
 
         # Save another file with page id which forwards to the original one
-        id_file_path = '%s/%s.html' % (folder_path, page_id)
-        id_file_page_title = 'Forward to page %s' % page_title
-        original_file_link = utils.encode_url(utils.sanitize_for_filename(file_name))
-        id_file_page_content = settings.HTML_FORWARD_MESSAGE % (original_file_link, page_title)
-        id_file_forward_header = '<meta http-equiv="refresh" content="0; url=%s" />' % original_file_link
-        utils.write_html_2_file(id_file_path, id_file_page_title, id_file_page_content, html_template,
-                                additional_headers=[id_file_forward_header])
+        #id_file_path = '%s/%s.html' % (folder_path, page_id)
+        #id_file_page_title = 'Forward to page %s' % page_title
+        #original_file_link = utils.encode_url(utils.sanitize_for_filename(file_name))
+        #id_file_page_content = settings.HTML_FORWARD_MESSAGE % (original_file_link, page_title)
+        #id_file_forward_header = '<meta http-equiv="refresh" content="0; url=%s" />' % original_file_link
+        #utils.write_html_2_file(id_file_path, id_file_page_title, id_file_page_content, html_template,
+        #                        additional_headers=[id_file_forward_header])
 
         # Iterate through all child pages
         page_url = '%s/rest/api/content/%s/child/page?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
@@ -498,6 +503,8 @@ def main():
                 space_index_title = 'Index of Space %s (%s)' % (space_name, space)
                 space_index_content = create_html_index(path_collection)
                 utils.write_html_2_file(space_index_path, space_index_title, space_index_content, html_template)
+
+            os.rmdir(download_folder)
         except utils.ConfluenceException as e:
             error_print('ERROR: %s' % e)
         except OSError:

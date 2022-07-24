@@ -1,5 +1,5 @@
 '''
-Prints list of incompletely downloaded spaces after using conlfuence-dumper
+Prints list of incompletely downloaded spaces after using confluence-dumper
 
 Usage: python incomplete_spaces.py [-r]
 Optional args:
@@ -9,7 +9,7 @@ import os
 import sys
 import shutil
 
-spaces_folder = "export_all3/" # folder where all spaces are saved
+spaces_folder = "export9/" # folder where all spaces are saved
 incomplete_spaces = [] # store list of incomplete spaces
 
 # parse args from command line

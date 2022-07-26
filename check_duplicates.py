@@ -1,11 +1,13 @@
 '''
 Checks for duplicate space folders after using confluence dumper
+
+Usage: python check_duplicates.py
 '''
 import os
 
 # the two folders you want to check
-folder1 = "export_all2/"
-folder2 = "export_all3/"
+folder1 = "export/export_all2/"
+folder2 = "export/export_all4/"
 
 spaces1 = os.listdir(folder1)
 spaces2 = os.listdir(folder2)

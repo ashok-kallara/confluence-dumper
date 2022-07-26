@@ -9,7 +9,7 @@ import os
 import sys
 import shutil
 
-spaces_folder = "export9/" # folder where all spaces are saved
+spaces_folder = "extra/" # folder where all spaces are saved
 incomplete_spaces = [] # store list of incomplete spaces
 
 # parse args from command line

@@ -322,7 +322,6 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
 
         # Remember this file and all children
         path_collection = {'file_path': file_name, 'page_title': page_title, 'child_pages': [], 'child_attachments': []}
-
         # Download attachments of this page
         # TODO: Outsource/Abstract the following two while loops because of much duplicate code.
         #page_url = '%s/rest/api/content/%s/child/attachment?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
@@ -347,7 +346,8 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
         #        page_url = None
 
         # Export HTML file
-        page_content = str(handle_html_references(page_content, page_duplicate_file_names, page_file_matching,
+        if page_content !=  "" and page_content != " ":
+            page_content = str(handle_html_references(page_content, page_duplicate_file_names, page_file_matching,
                                               depth=depth+1))
         file_path = '%s/%s' % (folder_path, file_name)
         #page_content += create_html_attachment_index(path_collection['child_attachments'])
@@ -494,16 +494,13 @@ def main():
                 space_page_id = response['homepage']['id']
             else:
                 space_page_id = -1
-
             path_collection = fetch_page_recursively(space_page_id, space_folder, download_folder, html_template)
-
             if path_collection:
                 # Create index file for this space
                 space_index_path = '%s/index.html' % space_folder
                 space_index_title = 'Index of Space %s (%s)' % (space_name, space)
                 space_index_content = create_html_index(path_collection)
                 utils.write_html_2_file(space_index_path, space_index_title, space_index_content, html_template)
-
             os.rmdir(download_folder)
         except utils.ConfluenceException as e:
             error_print('ERROR: %s' % e)

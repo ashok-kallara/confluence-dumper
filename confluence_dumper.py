@@ -303,7 +303,7 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
     if not attachment_file_matching:
         attachment_file_matching = {}
 
-    page_url = '%s/rest/api/content/%s?expand=children.page,children.attachment,body.view.value' \
+    page_url = '%s/wiki/rest/api/content/%s?expand=children.page,children.attachment,body.view.value' \
                % (settings.CONFLUENCE_BASE_URL, page_id)
     try:
         response = utils.http_get(page_url, auth=settings.HTTP_AUTHENTICATION, headers=settings.HTTP_CUSTOM_HEADERS,
@@ -324,7 +324,7 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
         path_collection = {'file_path': file_name, 'page_title': page_title, 'child_pages': [], 'child_attachments': []}
         # Download attachments of this page
         # TODO: Outsource/Abstract the following two while loops because of much duplicate code.
-        #page_url = '%s/rest/api/content/%s/child/attachment?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
+        #page_url = '%s/wiki/rest/api/content/%s/child/attachment?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
         #counter = 0
         #while page_url:
         #    response = utils.http_get(page_url, auth=settings.HTTP_AUTHENTICATION, headers=settings.HTTP_CUSTOM_HEADERS,
@@ -363,7 +363,7 @@ def fetch_page_recursively(page_id, folder_path, download_folder, html_template,
         #                        additional_headers=[id_file_forward_header])
 
         # Iterate through all child pages
-        page_url = '%s/rest/api/content/%s/child/page?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
+        page_url = '%s/wiki/rest/api/content/%s/child/page?limit=25' % (settings.CONFLUENCE_BASE_URL, page_id)
         counter = 0
         while page_url:
             response = utils.http_get(page_url, auth=settings.HTTP_AUTHENTICATION, headers=settings.HTTP_CUSTOM_HEADERS,
@@ -450,7 +450,7 @@ def main():
         spaces_to_export = settings.SPACES_TO_EXPORT
     else:
         spaces_to_export = []
-        page_url = '%s/rest/api/space?limit=25' % settings.CONFLUENCE_BASE_URL
+        page_url = '%s/wiki/rest/api/space?limit=25' % settings.CONFLUENCE_BASE_URL
         while page_url:
             response = utils.http_get(page_url, auth=settings.HTTP_AUTHENTICATION, headers=settings.HTTP_CUSTOM_HEADERS,
                                       verify_peer_certificate=settings.VERIFY_PEER_CERTIFICATE,
@@ -481,7 +481,7 @@ def main():
             download_folder = '%s/%s' % (space_folder, settings.DOWNLOAD_SUB_FOLDER)
             os.makedirs(download_folder)
 
-            space_url = '%s/rest/api/space/%s?expand=homepage' % (settings.CONFLUENCE_BASE_URL, space)
+            space_url = '%s/wiki/rest/api/space/%s?expand=homepage' % (settings.CONFLUENCE_BASE_URL, space)
             response = utils.http_get(space_url, auth=settings.HTTP_AUTHENTICATION,
                                       headers=settings.HTTP_CUSTOM_HEADERS,
                                       verify_peer_certificate=settings.VERIFY_PEER_CERTIFICATE,
